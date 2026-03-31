@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Personal Site</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .container {
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .section {
+      margin: 40px auto;
+      max-width: 800px;
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    a {
+      color: #00d4ff;
+    }
+
+    textarea, input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border: none;
+      background: #00d4ff;
+      color: black;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .post {
+      background: rgba(255,255,255,0.2);
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    /* 看板娘 */
+    #girl {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 120px;
+      cursor: grab;
+      user-select: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>我的个人网站</h1>
+
+  <div class="section">
+    <h2>个人介绍</h2>
+    <p>你好，我是Spark Shi，一名热爱编程、音乐游戏和明日方舟的开发者。我的研究兴趣是大语言模型和知识图谱。个人爱好是游戏、谱面设计和音乐鉴赏。欢迎访问我的网站！</p> 
+  </div>
+
+  <div class="section">
+    <h2>Bilibili</h2>
+    <p><a href="https://space.bilibili.com/374247443" target="_blank">点击访问我的B站主页</a></p>
+  </div>
+
+  <div class="section">
+    <h2>博客发布</h2>
+    <input id="title" placeholder="标题">
+    <textarea id="content" placeholder="写点什么..."></textarea>
+    <button onclick="addPost()">发布</button>
+
+    <div id="posts"></div>
+  </div>
+
+  <div class="section">
+    <h2>评论区</h2>
+    <textarea id="commentInput" placeholder="输入评论"></textarea>
+    <button onclick="addComment()">提交评论</button>
+    <div id="comments"></div>
+  </div>
+
+</div>
+
+<img src="girl.png" id="girl">
+
+<script>
+
+// 博客系统（基于 localStorage）
+function addPost() {
+  const title = document.getElementById('title').value;
+  const content = document.getElementById('content').value;
+
+  if (!title || !content) return;
+
+  const post = {title, content, time: new Date().toLocaleString()};
+
+  let posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  posts.unshift(post);
+  localStorage.setItem('posts', JSON.stringify(posts));
+
+  renderPosts();
+}
+
+function renderPosts() {
+  const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  const container = document.getElementById('posts');
+  container.innerHTML = '';
+
+  posts.forEach((p, index) => {
+    const div = document.createElement('div');
+    div.className = 'post';
+
+    const link = window.location.href.split('?')[0] + '?post=' + index;
+
+    div.innerHTML = `<h3>${p.title}</h3><p>${p.content}</p><small>${p.time}</small><br>
+    <button onclick="copyLink('${link}')">分享</button>`;
+
+    container.appendChild(div);
+  });
+}
+
+function copyLink(link) {
+  navigator.clipboard.writeText(link);
+  alert('链接已复制');
+}
+
+// 评论系统
+function addComment() {
+  const text = document.getElementById('commentInput').value;
+  if (!text) return;
+
+  let comments = JSON.parse(localStorage.getItem('comments') || '[]');
+  comments.push(text);
+  localStorage.setItem('comments', JSON.stringify(comments));
+
+  renderComments();
+}
+
+function renderComments() {
+  const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+  const container = document.getElementById('comments');
+  container.innerHTML = '';
+
+  comments.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'post';
+    div.innerText = c;
+    container.appendChild(div);
+  });
+}
+
+// 看板娘拖拽
+const girl = document.getElementById('girl');
+let offsetX, offsetY, dragging = false;
+
+girl.addEventListener('mousedown', (e) => {
+  dragging = true;
+  offsetX = e.clientX - girl.offsetLeft;
+  offsetY = e.clientY - girl.offsetTop;
+  girl.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (dragging) {
+    girl.style.left = (e.clientX - offsetX) + 'px';
+    girl.style.top = (e.clientY - offsetY) + 'px';
+    girl.style.right = 'auto';
+    girl.style.bottom = 'auto';
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  dragging = false;
+  girl.style.cursor = 'grab';
+});
+
+// 初始化
+renderPosts();
+renderComments();
+
+</script>
+
+</body>
+</html>
